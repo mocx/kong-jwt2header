@@ -16,7 +16,7 @@ local lower = string.lower
 local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
 
 
-local JWT2Header = {
+local HttpLogHandler = {
   PRIORITY = 12,
   VERSION = kong_meta.version,
 }
@@ -43,7 +43,7 @@ local params_cache = {
 }
 
 
-function JWT2Header:rewrite(conf)
+function HttpLogHandler:rewrite(conf)
    kong.service.request.set_header("X-Kong-JWT-Kong-Proceed", "no")
   kong.log.debug(kong.request.get_header("Authorization") )
    local claims = nil
@@ -74,7 +74,7 @@ function JWT2Header:rewrite(conf)
 end
 
 
-function JWT2Header:access(conf)
+function HttpLogHandler:access(conf)
   if kong.request.get_header("X-Kong-JWT-Kong-Proceed") == "yes" then    
       -- ctx oesn't work in kong 1.5, only in 2.x local claims = kong.ctx.plugin.claims
       local claims = kong.request.get_headers();
@@ -211,7 +211,7 @@ end
 
 
 
-function JWT2Header:log(conf)
+function HttpLogHandler:log(conf)
   if conf.custom_fields_by_lua then
     local set_serialize_value = kong.log.set_serialize_value
     for key, expression in pairs(conf.custom_fields_by_lua) do
@@ -253,4 +253,4 @@ function JWT2Header:log(conf)
 end
 
 
-return JWT2Header
+return HttpLogHandler

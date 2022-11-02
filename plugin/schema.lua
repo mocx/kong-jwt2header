@@ -3,7 +3,7 @@ local url = require "socket.url"
 
 
 return {
-  name = "jwt-to-header",
+  name = "kong-to-loki",
   fields = {
     {
       route = typedefs.no_route,
