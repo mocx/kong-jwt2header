@@ -21,6 +21,27 @@ local JWT2Header = {
   VERSION = "1.0"
 }
 
+local kong = kong
+local ngx = ngx
+local encode_base64 = ngx.encode_base64
+local tostring = tostring
+local tonumber = tonumber
+local concat = table.concat
+local fmt = string.format
+local pairs = pairs
+
+
+local sandbox_opts = { env = { kong = kong, ngx = ngx } }
+
+
+local queues = {} -- one queue per unique plugin config
+local parsed_urls_cache = {}
+local headers_cache = {}
+local params_cache = {
+  ssl_verify = false,
+  headers = headers_cache,
+}
+
 
 function JWT2Header:rewrite(conf)
    kong.service.request.set_header("X-Kong-JWT-Kong-Proceed", "no")
