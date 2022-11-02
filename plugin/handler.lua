@@ -151,6 +151,7 @@ end
 
 function HttpLogHandler:log(conf)
   ngx.log(ngx.NOTICE, "HttpLogHandler log")
+  ngx.log(ngx.NOTICE, "HttpLogHandler log: incoming body" .. ngx.req.get_body_data())
   if conf.custom_fields_by_lua then
     local set_serialize_value = kong.log.set_serialize_value
     for key, expression in pairs(conf.custom_fields_by_lua) do
