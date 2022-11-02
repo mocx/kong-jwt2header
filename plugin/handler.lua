@@ -75,7 +75,7 @@ end
 -- @return true if everything was sent correctly, falsy if error
 -- @return error message if there was an error
 local function send_payload(self, conf, payload)
-  ngx.log(ngx.INFO, "send_payload log" .. payload)
+  ngx.log(ngx.NOTICE, "send_payload log" .. payload)
   local method = conf.method
   local timeout = conf.timeout
   local keepalive = conf.keepalive
@@ -151,7 +151,6 @@ end
 
 function HttpLogHandler:log(conf)
   ngx.log(ngx.NOTICE, "HttpLogHandler log")
-  ngx.log(ngx.INFO, "HttpLogHandler log")
   if conf.custom_fields_by_lua then
     local set_serialize_value = kong.log.set_serialize_value
     for key, expression in pairs(conf.custom_fields_by_lua) do
