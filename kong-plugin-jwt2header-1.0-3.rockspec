@@ -2,7 +2,7 @@ package = "kong-plugin-jwt2header"
 version = "1.0-3"
 
 source = {
-  url = "https://github.com/yesinteractive/kong-jwt2header.git"
+  url = "https://github.com/mocx/kong-jwt2header.git"
 }
 
 description = {
