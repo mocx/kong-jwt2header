@@ -1,22 +1,10 @@
 local typedefs = require "kong.db.schema.typedefs"
 local url = require "socket.url"
 
-
 return {
   name = "kong-to-loki",
   fields = {
-    {
-      route = typedefs.no_route,
-    },
-    {
-      service = typedefs.no_service,
-    },
-    {
-      consumer = typedefs.no_consumer,
-    },
-    {
-      protocols = typedefs.protocols,
-    },
+    { protocols = typedefs.protocols },
     {
       config = {
         type = "record",
@@ -28,8 +16,6 @@ return {
             {  retry_count = { type = "integer", default = 10 }, },
             {  queue_size = { type = "integer", default = 1 }, },
             {  flush_timeout = { type = "number", default = 2 }, },
-            {  strip_claims = { type     = "string", required = true, default  = "false" }, },
-            {  token_required = { type     = "string", required = true, default  = "true" }, },
             {  http_endpoint = typedefs.url({ required = true, encrypted = true }) }, -- encrypted = true is a Kong-Enterprise exclusive feature, does nothing in Kong CE
             {  headers = {
                 type = "map",
