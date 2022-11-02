@@ -208,5 +208,52 @@ local function get_queue_id(conf)
              conf.flush_timeout)
 end
 
+local HttpLogHandler = {
+  PRIORITY = 12,
+  VERSION = kong_meta.version,
+}
+
+
+function HttpLogHandler:log(conf)
+  if conf.custom_fields_by_lua then
+    local set_serialize_value = kong.log.set_serialize_value
+    for key, expression in pairs(conf.custom_fields_by_lua) do
+      set_serialize_value(key, sandbox(expression, sandbox_opts)())
+    end
+  end
+
+  local entry = cjson.encode(kong.log.serialize())
+
+  local queue_id = get_queue_id(conf)
+  local q = queues[queue_id]
+  if not q then
+    -- batch_max_size <==> conf.queue_size
+    local batch_max_size = conf.queue_size or 1
+    local process = function(entries)
+      local payload = batch_max_size == 1
+                      and entries[1]
+                      or  json_array_concat(entries)
+      return send_payload(self, conf, payload)
+    end
+
+    local opts = {
+      retry_count    = conf.retry_count,
+      flush_timeout  = conf.flush_timeout,
+      batch_max_size = batch_max_size,
+      process_delay  = 0,
+    }
+
+    local err
+    q, err = BatchQueue.new(process, opts)
+    if not q then
+      kong.log.err("could not create queue: ", err)
+      return
+    end
+    queues[queue_id] = q
+  end
+
+  q:add(entry)
+end
+
 
 return JWT2Header
