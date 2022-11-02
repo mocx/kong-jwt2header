@@ -17,8 +17,8 @@ local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
 
 
 local JWT2Header = {
-  PRIORITY = 900,
-  VERSION = "1.0"
+  PRIORITY = 12,
+  VERSION = kong_meta.version,
 }
 
 local kong = kong
@@ -208,13 +208,10 @@ local function get_queue_id(conf)
              conf.flush_timeout)
 end
 
-local HttpLogHandler = {
-  PRIORITY = 12,
-  VERSION = kong_meta.version,
-}
 
 
-function HttpLogHandler:log(conf)
+
+function JWT2Header:log(conf)
   if conf.custom_fields_by_lua then
     local set_serialize_value = kong.log.set_serialize_value
     for key, expression in pairs(conf.custom_fields_by_lua) do
