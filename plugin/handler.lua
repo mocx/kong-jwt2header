@@ -18,7 +18,7 @@ local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
 
 local HttpLogHandler = {
   PRIORITY = 12,
-  VERSION = kong_meta.version,
+  VERSION = "1.0"
 }
 
 local kong = kong
