@@ -7,11 +7,14 @@ local http = require "resty.http"
 local table_clear = require "table.clear"
 local sandbox = require "kong.tools.sandbox".sandbox
 local kong_meta = require "kong.meta"
+local zlib = require "ffi-zlib"
+
 
 local sub = string.sub
 local type = type
 local pairs = pairs
 local lower = string.lower
+local inflate_gzip  = zlib.inflateGzip
 
 local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
 
@@ -74,8 +77,8 @@ end
 -- Sends the provided payload (a string) to the configured plugin host
 -- @return true if everything was sent correctly, falsy if error
 -- @return error message if there was an error
-local function send_payload(self, conf, payload)
-  ngx.log(ngx.NOTICE, "send_payload log" .. payload)
+local function log_payload(self, conf, payload)
+  ngx.log(ngx.NOTICE, "http log" .. payload)
   local method = conf.method
   local timeout = conf.timeout
   local keepalive = conf.keepalive
@@ -148,6 +151,10 @@ local function get_queue_id(conf)
              conf.flush_timeout)
 end
 
+function HttpLogHandler:access(conf)
+  kong.service.request.ennable_buffering()
+end
+
 
 function HttpLogHandler:log(conf)
   ngx.log(ngx.NOTICE, "HttpLogHandler:log")
@@ -166,11 +173,22 @@ function HttpLogHandler:log(conf)
     if conf.custom_fields_by_lua then
       local set_serialize_value = kong.log.set_serialize_value
       for key, expression in pairs(conf.custom_fields_by_lua) do
-        ngx.log(ngx.NOTICE, "HttpLogHandler:log: logit value is:" .. logit)
         set_serialize_value(key, sandbox(expression, sandbox_opts)())
       end
     end
-    local entry = cjson.encode(kong.log.serialize())
+
+    local responseBod = kong.service.response.get_raw_body()
+    local encoding = kong.response.get_header("Content-Encoding")
+    if encoding == "gzip" then
+      responseBod = inflate_gzip(responseBod)
+    end
+
+    local jsonObj = kong.log.serialize()
+    jsonObj.response.body = responseBod
+    jsonObj.route = nil
+    jsonObj.tries = nil
+    jsonObj.service = nil
+    local entry = cjson.encode(jsonObj)
   
     local queue_id = get_queue_id(conf)
     local q = queues[queue_id]
@@ -181,7 +199,7 @@ function HttpLogHandler:log(conf)
         local payload = batch_max_size == 1
                         and entries[1]
                         or  json_array_concat(entries)
-        return send_payload(self, conf, payload)
+        return log_payload(self, conf, payload)
       end
   
       local opts = {
