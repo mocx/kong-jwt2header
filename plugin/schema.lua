@@ -40,7 +40,17 @@ return {
                   type = "string",
                 },
             }},
-            { custom_fields_by_lua = typedefs.lua_code },          
+            --{ custom_fields_by_lua = typedefs.lua_code },
+            { custom_fields_by_lua = {
+              route = "return nil",
+              header = "return kong.request.get_header('Content-Length')",
+              --request.headers = "return kong.request.get_header('Content-Length')",
+              tries = "return nil",
+              service = "return nil",
+              --response.body = "return kong.service.response.get_body()"
+              }
+          
+          },           
         },
         custom_validator = function(config)
           -- check no double userinfo + authorization header
