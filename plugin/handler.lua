@@ -168,7 +168,7 @@ function HttpLogHandler:log(conf)
     logit = true
     ngx.log(ngx.NOTICE, "HttpLogHandler:log: error_mode is false, so we send logs")
   end
-  ngx.log(ngx.NOTICE, "HttpLogHandler:log: logit value is:" .. logit)
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log: logit value is:" .. tostring(logit))
   if logit then
     if conf.custom_fields_by_lua then
       local set_serialize_value = kong.log.set_serialize_value
