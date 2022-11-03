@@ -152,7 +152,8 @@ local function get_queue_id(conf)
 end
 
 function HttpLogHandler:access(conf)
-  kong.service.request.ennable_buffering()
+  --do this to get the response body else "Error: service body is only available with buffered proxying"
+  kong.service.request.enable_buffering()
 end
 
 
