@@ -152,44 +152,54 @@ end
 function HttpLogHandler:log(conf)
   ngx.log(ngx.NOTICE, "HttpLogHandler log")
   ngx.log(ngx.NOTICE, "HttpLogHandler log: incoming body" .. ngx.req.get_body_data())
-  if conf.custom_fields_by_lua then
-    local set_serialize_value = kong.log.set_serialize_value
-    for key, expression in pairs(conf.custom_fields_by_lua) do
-      set_serialize_value(key, sandbox(expression, sandbox_opts)())
-    end
+  local logit = false
+  if conf.error_mode and not string.find(tostring(kong.response.get_status()), "20") then
+    logit = true
+  end
+  if not conf.error_mode then
+    logit = true
   end
 
-  local entry = cjson.encode(kong.log.serialize())
-
-  local queue_id = get_queue_id(conf)
-  local q = queues[queue_id]
-  if not q then
-    -- batch_max_size <==> conf.queue_size
-    local batch_max_size = conf.queue_size or 1
-    local process = function(entries)
-      local payload = batch_max_size == 1
-                      and entries[1]
-                      or  json_array_concat(entries)
-      return send_payload(self, conf, payload)
+  if logit then
+    if conf.custom_fields_by_lua then
+      local set_serialize_value = kong.log.set_serialize_value
+      for key, expression in pairs(conf.custom_fields_by_lua) do
+        set_serialize_value(key, sandbox(expression, sandbox_opts)())
+      end
     end
-
-    local opts = {
-      retry_count    = conf.retry_count,
-      flush_timeout  = conf.flush_timeout,
-      batch_max_size = batch_max_size,
-      process_delay  = 0,
-    }
-
-    local err
-    q, err = BatchQueue.new(process, opts)
+    local entry = cjson.encode(kong.log.serialize())
+  
+    local queue_id = get_queue_id(conf)
+    local q = queues[queue_id]
     if not q then
-      kong.log.err("could not create queue: ", err)
-      return
+      -- batch_max_size <==> conf.queue_size
+      local batch_max_size = conf.queue_size or 1
+      local process = function(entries)
+        local payload = batch_max_size == 1
+                        and entries[1]
+                        or  json_array_concat(entries)
+        return send_payload(self, conf, payload)
+      end
+  
+      local opts = {
+        retry_count    = conf.retry_count,
+        flush_timeout  = conf.flush_timeout,
+        batch_max_size = batch_max_size,
+        process_delay  = 0,
+      }
+  
+      local err
+      q, err = BatchQueue.new(process, opts)
+      if not q then
+        kong.log.err("could not create queue: ", err)
+        return
+      end
+      queues[queue_id] = q
     end
-    queues[queue_id] = q
+  
+    q:add(entry)
   end
-
-  q:add(entry)
+  
 end
 
 
