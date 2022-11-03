@@ -150,20 +150,23 @@ end
 
 
 function HttpLogHandler:log(conf)
-  ngx.log(ngx.NOTICE, "HttpLogHandler log")
-  ngx.log(ngx.NOTICE, "HttpLogHandler log: incoming body" .. ngx.req.get_body_data())
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log")
+  --ngx.log(ngx.NOTICE, "HttpLogHandler:log: incoming body" .. ngx.req.get_body_data())
   local logit = false
   if conf.error_mode and not string.find(tostring(kong.response.get_status()), "20") then
     logit = true
+    ngx.log(ngx.NOTICE, "HttpLogHandler:log: error_mode is true and response status does not contain 200")
   end
   if not conf.error_mode then
     logit = true
+    ngx.log(ngx.NOTICE, "HttpLogHandler:log: error_mode is false, so we send logs")
   end
-
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log: logit value is:" .. logit)
   if logit then
     if conf.custom_fields_by_lua then
       local set_serialize_value = kong.log.set_serialize_value
       for key, expression in pairs(conf.custom_fields_by_lua) do
+        ngx.log(ngx.NOTICE, "HttpLogHandler:log: logit value is:" .. logit)
         set_serialize_value(key, sandbox(expression, sandbox_opts)())
       end
     end
