@@ -6,7 +6,6 @@ local url = require "socket.url"
 local http = require "resty.http"
 local table_clear = require "table.clear"
 local sandbox = require "kong.tools.sandbox".sandbox
-local kong_meta = require "kong.meta"
 local zlib = require "ffi-zlib"
 
 
@@ -74,63 +73,75 @@ local function parse_url(host_url)
   return parsed_url
 end
 
+-- check for nil or emptu.
+-- @param `string` host url
+-- @return `true or false`
+local function isempty(s)
+  return s == nil or s == ''
+end
+
 -- Sends the provided payload (a string) to the configured plugin host
 -- @return true if everything was sent correctly, falsy if error
 -- @return error message if there was an error
 local function log_payload(self, conf, payload)
   ngx.log(ngx.NOTICE, "http log" .. payload)
-  local method = conf.method
-  local timeout = conf.timeout
-  local keepalive = conf.keepalive
-  local content_type = conf.content_type
   local http_endpoint = conf.http_endpoint
+  if not isempty(http_endpoint) then
+    local method = conf.method
+    local timeout = conf.timeout
+    local keepalive = conf.keepalive
+    local content_type = conf.content_type
+    
 
-  local parsed_url = parse_url(http_endpoint)
-  local host = parsed_url.host
-  local port = tonumber(parsed_url.port)
+    local parsed_url = parse_url(http_endpoint)
+    local host = parsed_url.host
+    local port = tonumber(parsed_url.port)
 
-  local httpc = http.new()
-  httpc:set_timeout(timeout)
+    local httpc = http.new()
+    httpc:set_timeout(timeout)
 
-  table_clear(headers_cache)
-  if conf.headers then
-    for h, v in pairs(conf.headers) do
-      headers_cache[h] = v
+    table_clear(headers_cache)
+    if conf.headers then
+      for h, v in pairs(conf.headers) do
+        headers_cache[h] = v
+      end
     end
-  end
 
-  headers_cache["Host"] = parsed_url.host
-  headers_cache["Content-Type"] = content_type
-  headers_cache["Content-Length"] = #payload
-  if parsed_url.userinfo then
-    headers_cache["Authorization"] = "Basic " .. encode_base64(parsed_url.userinfo)
-  end
+    headers_cache["Host"] = parsed_url.host
+    headers_cache["Content-Type"] = content_type
+    headers_cache["Content-Length"] = #payload
+    if parsed_url.userinfo then
+      headers_cache["Authorization"] = "Basic " .. encode_base64(parsed_url.userinfo)
+    end
 
-  params_cache.method = method
-  params_cache.body = payload
-  params_cache.keepalive_timeout = keepalive
+    params_cache.method = method
+    params_cache.body = payload
+    params_cache.keepalive_timeout = keepalive
 
-  local url = fmt("%s://%s:%d%s", parsed_url.scheme, parsed_url.host, parsed_url.port, parsed_url.path)
+  
+    local url = fmt("%s://%s:%d%s", parsed_url.scheme, parsed_url.host, parsed_url.port, parsed_url.path)
 
-  -- note: `httpc:request` makes a deep copy of `params_cache`, so it will be
-  -- fine to reuse the table here
-  local res, err = httpc:request_uri(url, params_cache)
-  if not res then
-    return nil, "failed request to " .. host .. ":" .. tostring(port) .. ": " .. err
-  end
+    -- note: `httpc:request` makes a deep copy of `params_cache`, so it will be
+    -- fine to reuse the table here
+    local res, err = httpc:request_uri(url, params_cache)
+    if not res then
+      return nil, "failed request to " .. host .. ":" .. tostring(port) .. ": " .. err
+    end
 
-  -- always read response body, even if we discard it without using it on success
-  local response_body = res.body
-  local success = res.status < 400
-  local err_msg
+    -- always read response body, even if we discard it without using it on success
+    local response_body = res.body
+    local success = res.status < 400
+    local err_msg
 
-  if not success then
-    err_msg = "request to " .. host .. ":" .. tostring(port) ..
-              " returned status code " .. tostring(res.status) .. " and body " ..
-              response_body
-  end
+    if not success then
+      err_msg = "request to " .. host .. ":" .. tostring(port) ..
+                " returned status code " .. tostring(res.status) .. " and body " ..
+                response_body
+    end
 
-  return success, err_msg
+    return success, err_msg
+    end
+  
 end
 
 
