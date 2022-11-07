@@ -212,9 +212,9 @@ function HttpLogHandler:log(conf)
     jsonObj.client_ip = nil
     -- remove all other headers except those that start with 'x-'
     for k, v in pairs(jsonObj.request.headers) do
-      print(k, v)
+      print(k," ", v)
       if not k:find("x", 1, true) == 1 or not k:find("X", 1, true) == 1 then 
-        jsonObj.request.headers.k = nil
+        jsonObj.request.headers[k] = nil
       end
       --ngx.log(ngx.NOTICE, "http log" .. payload)
     end
