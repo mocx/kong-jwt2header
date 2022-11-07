@@ -198,9 +198,25 @@ function HttpLogHandler:log(conf)
 
     local jsonObj = kong.log.serialize()
     jsonObj.response.body = responseBod
+    -- remove all data we done need from the log payload
     jsonObj.route = nil
     jsonObj.tries = nil
     jsonObj.service = nil
+    jsonObj.workspace = nil
+    jsonObj.request.uri = nil
+    jsonObj.request.size = nil
+    jsonObj.request.querystring = nil
+    jsonObj.response.size = nil
+    jsonObj.response.headers = nil
+    jsonObj.started_at = nil
+    jsonObj.client_ip = nil
+    local headers_ = cjson.decode(jsonObj.request.headers)
+    -- remove all other headers except those that start with 'x-'
+    for k, v in pairs(headers_) do
+      debug("The value of header %s is %s.\n", k, v)
+      print("The value of header %s is %s.\n", k, v)
+      --ngx.log(ngx.NOTICE, "http log" .. payload)
+    end
     local entry = cjson.encode(jsonObj)
   
     local queue_id = get_queue_id(conf)
