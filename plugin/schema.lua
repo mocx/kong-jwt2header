@@ -17,7 +17,7 @@ return {
             {  queue_size = { type = "integer", default = 1 }, },
             {  error_mode = { type = "boolean", default = true }, },
             {  flush_timeout = { type = "number", default = 2 }, },
-            {  http_endpoint = typedefs.url({ required = true, encrypted = true }) }, -- encrypted = true is a Kong-Enterprise exclusive feature, does nothing in Kong CE
+            {  http_endpoint = typedefs.url({ required = false, encrypted = true }) }, -- encrypted = true is a Kong-Enterprise exclusive feature, does nothing in Kong CE
             {  headers = {
                 type = "map",
                 keys = typedefs.header_name {
