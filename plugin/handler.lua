@@ -213,7 +213,7 @@ function HttpLogHandler:log(conf)
     -- remove all other headers except those that start with 'x-'
     for k, v in pairs(jsonObj.request.headers) do
       --print(k," ", v)
-      if not k:find("x", 1, true) == 1 or not k:find("X", 1, true) == 1 then 
+      if k:find("x", 1, true) == 1 or k:find("X", 1, true) == 1 then 
         print(k," ", v)
         jsonObj.request.headers[k] = nil
       end
