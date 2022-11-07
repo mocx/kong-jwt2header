@@ -85,6 +85,8 @@ end
 -- @return error message if there was an error
 local function log_payload(self, conf, payload)
   ngx.log(ngx.NOTICE, "http log" .. payload)
+  local success = true
+  local err_msg
   local http_endpoint = conf.http_endpoint
   if not isempty(http_endpoint) then
     local method = conf.method
@@ -130,8 +132,7 @@ local function log_payload(self, conf, payload)
 
     -- always read response body, even if we discard it without using it on success
     local response_body = res.body
-    local success = res.status < 400
-    local err_msg
+    success = res.status < 400
 
     if not success then
       err_msg = "request to " .. host .. ":" .. tostring(port) ..
@@ -139,9 +140,9 @@ local function log_payload(self, conf, payload)
                 response_body
     end
 
-    return success, err_msg
+    
     end
-  
+  return success, err_msg
 end
 
 
