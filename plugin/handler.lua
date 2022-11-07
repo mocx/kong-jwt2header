@@ -190,7 +190,7 @@ function HttpLogHandler:log(conf)
       end
     end
 
-    local responseBod = kong.service.response.get_body_data()
+    local responseBod = kong.service.response.get_raw_body()
     local encoding = kong.response.get_header("Content-Encoding")
     if encoding == "gzip" then
       responseBod = inflate_gzip(responseBod)
