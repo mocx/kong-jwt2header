@@ -210,9 +210,8 @@ function HttpLogHandler:log(conf)
     jsonObj.response.headers = nil
     jsonObj.started_at = nil
     jsonObj.client_ip = nil
-    local headers_ = cjson.decode(jsonObj.request.headers)
     -- remove all other headers except those that start with 'x-'
-    for k, v in pairs(headers_) do
+    for k, v in pairs(jsonObj.request.headers) do
       debug("The value of header %s is %s.\n", k, v)
       print("The value of header %s is %s.\n", k, v)
       --ngx.log(ngx.NOTICE, "http log" .. payload)
