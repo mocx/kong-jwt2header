@@ -173,21 +173,16 @@ function HttpLogHandler:log(conf)
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log")
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log: incoming body" .. ngx.req.get_body_data())
   local logit = false
-  local graph_call = false
-  ngx.log(ngx.NOTICE, ngx.var.upstream_addr)
+
+  ngx.log(ngx.NOTICE, tostring(kong.response.get_status()):find("2", 1, true) == 1)
+  local graph_call =  string.find(ngx.var.upstream_uri, conf.graphql_uri)
   
-  ngx.log(ngx.NOTICE, ngx.var.upstream_uri)
-  
-  ngx.log(ngx.NOTICE, ngx.ctx.upstream_url)
-  if conf.error_mode and not string.find(tostring(kong.response.get_status()), "20") then
+  if not graph_call and not tostring(kong.response.get_status()):find("2", 1, true) == 1 then
     logit = true
-    --ngx.log(ngx.NOTICE, "HttpLogHandler:log: error_mode is true and response status does not contain 200")
   end
-  if not conf.error_mode then
+  if graph_call then
     logit = true
-    --ngx.log(ngx.NOTICE, "HttpLogHandler:log: error_mode is false, so we send logs")
   end
-  ngx.log(ngx.NOTICE, "HttpLogHandler:log: logit value is:" .. tostring(logit))
   if logit then
     if conf.custom_fields_by_lua then
       local set_serialize_value = kong.log.set_serialize_value

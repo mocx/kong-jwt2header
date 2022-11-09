@@ -15,7 +15,7 @@ return {
             {  keepalive = { type = "number", default = 60000 }, },
             {  retry_count = { type = "integer", default = 10 }, },
             {  queue_size = { type = "integer", default = 1 }, },
-            {  error_mode = { type = "boolean", default = true }, },
+            {  graphql_uri = { type = "string", default = "/graphql" }, },
             {  flush_timeout = { type = "number", default = 2 }, },
             {  http_endpoint = typedefs.url({ required = false, encrypted = true }) }, -- encrypted = true is a Kong-Enterprise exclusive feature, does nothing in Kong CE
             {  headers = {
