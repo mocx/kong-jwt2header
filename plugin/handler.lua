@@ -173,9 +173,11 @@ function HttpLogHandler:log(conf)
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log")
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log: incoming body" .. ngx.req.get_body_data())
   local logit = false
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log:upstream: " ..tostring(ngx.var.upstream_uri))
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log:conf_graphurl: " ..conf.graphql_uri)
   local graph_call =  tostring(ngx.var.upstream_uri) == conf.graphql_uri
-
-  ngx.log(ngx.NOTICE, "HttpLogHandler:log" ..tostring(kong.response.get_status()))
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log:isgraph: " ..tostring(graph_call))
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log:httpstatus: " ..tostring(kong.response.get_status()))
   if not graph_call and not tostring(kong.response.get_status()):find("2", 1, true) == 1 then
     logit = true
   end
@@ -184,6 +186,8 @@ function HttpLogHandler:log(conf)
     local body_ = cjson.decode(kong.service.response.get_raw_body())
     logit =  body_.errors  ~= nil
   end
+
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log:logit: " ..tostring(logit))
   if logit then
     if conf.custom_fields_by_lua then
       local set_serialize_value = kong.log.set_serialize_value
