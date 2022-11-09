@@ -179,8 +179,10 @@ function HttpLogHandler:log(conf)
     logit = true
   end
   if graph_call then
-    ngx.log(ngx.NOTICE, kong.service.response.get_raw_body()["errors"])
-    logit = not kong.service.response.get_raw_body()["errors"]  == nil
+    ngx.log(ngx.NOTICE, kong.service.response.get_raw_body())
+    local body_ = cjson.decode(kong.service.response.get_raw_body())
+    ngx.log(ngx.NOTICE, body_["errors"])
+    logit = not body_["errors"]  == nil
   end
   if logit then
     if conf.custom_fields_by_lua then
