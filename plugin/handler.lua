@@ -181,7 +181,7 @@ function HttpLogHandler:log(conf)
   if graph_call then
     ngx.log(ngx.NOTICE, kong.service.response.get_raw_body())
     local body_ = cjson.decode(kong.service.response.get_raw_body())
-    ngx.log(ngx.NOTICE, body_["errors"])
+    ngx.log(ngx.NOTICE, tostring(body_["errors"]))
     logit = not body_["errors"]  == nil
   end
   if logit then
