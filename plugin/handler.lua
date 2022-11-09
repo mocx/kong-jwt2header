@@ -173,6 +173,12 @@ function HttpLogHandler:log(conf)
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log")
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log: incoming body" .. ngx.req.get_body_data())
   local logit = false
+  local graph_call = false
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log: ngx.var.upstream_addr" .. ngx.var.upstream_addr)
+  
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log: ngx.var.upstream_uri" .. ngx.var.upstream_uri)
+  
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log: ngx.ctx.upstream_url" .. ngx.ctx.upstream_url)
   if conf.error_mode and not string.find(tostring(kong.response.get_status()), "20") then
     logit = true
     --ngx.log(ngx.NOTICE, "HttpLogHandler:log: error_mode is true and response status does not contain 200")
@@ -203,6 +209,7 @@ function HttpLogHandler:log(conf)
     jsonObj.tries = nil
     jsonObj.service = nil
     jsonObj.workspace = nil
+    jsonObj.authenticated_entity = nil
     jsonObj.request.uri = nil
     jsonObj.request.size = nil
     jsonObj.request.querystring = nil
