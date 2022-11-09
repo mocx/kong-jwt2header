@@ -181,12 +181,7 @@ function HttpLogHandler:log(conf)
   if graph_call then
     ngx.log(ngx.NOTICE, kong.service.response.get_raw_body())
     local body_ = cjson.decode(kong.service.response.get_raw_body())
-    for k, v in pairs(body_) do
-      print(k," ", v)
-    end
-
-    
-    logit = not body_["errors"]  == nil
+    logit =  body_.errors  ~= nil
   end
   if logit then
     if conf.custom_fields_by_lua then
