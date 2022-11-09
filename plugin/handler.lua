@@ -173,18 +173,14 @@ function HttpLogHandler:log(conf)
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log")
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log: incoming body" .. ngx.req.get_body_data())
   local logit = false
-
-  ngx.log(ngx.NOTICE, tostring(kong.response.get_status()):find("2", 1, true) == 1)
-  ngx.log(ngx.NOTICE, conf.graphql_uri)
-  ngx.log(ngx.NOTICE, tostring(ngx.var.upstream_uri))
   local graph_call =  tostring(ngx.var.upstream_uri) == conf.graphql_uri
-  ngx.log(ngx.NOTICE, graph_call)
 
   if not graph_call and not tostring(kong.response.get_status()):find("2", 1, true) == 1 then
     logit = true
   end
   if graph_call then
-    logit = true
+    ngx.log(ngx.NOTICE, kong.service.response.get_raw_body()["errors"])
+    logit = not kong.service.response.get_raw_body()["errors"]  == nil
   end
   if logit then
     if conf.custom_fields_by_lua then
