@@ -175,6 +175,7 @@ function HttpLogHandler:log(conf)
   local logit = false
   local graph_call =  tostring(ngx.var.upstream_uri) == conf.graphql_uri
 
+  ngx.log(ngx.NOTICE, "HttpLogHandler:log" ..tostring(kong.response.get_status()))
   if not graph_call and not tostring(kong.response.get_status()):find("2", 1, true) == 1 then
     logit = true
   end
