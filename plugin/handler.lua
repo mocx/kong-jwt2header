@@ -84,7 +84,7 @@ end
 -- @return true if everything was sent correctly, falsy if error
 -- @return error message if there was an error
 local function log_payload(self, conf, payload)
-  ngx.log(ngx.NOTICE, "http log" .. payload)
+  ngx.log(ngx.NOTICE, "httplog" .. payload)
   local success = true
   local err_msg
   local http_endpoint = conf.http_endpoint
@@ -179,7 +179,7 @@ function HttpLogHandler:log(conf)
     logit = true
   end
   if graph_call then
-    ngx.log(ngx.NOTICE, kong.service.response.get_raw_body())
+    --ngx.log(ngx.NOTICE, kong.service.response.get_raw_body())
     local body_ = cjson.decode(kong.service.response.get_raw_body())
     logit =  body_.errors  ~= nil
   end
@@ -216,7 +216,7 @@ function HttpLogHandler:log(conf)
     for k, v in pairs(jsonObj.request.headers) do
       --print(k," ", v)
       if not (k:find("x", 1, true) == 1 or k:find("X", 1, true) == 1) then 
-        print(k," ", v)
+        --print(k," ", v)
         jsonObj.request.headers[k] = nil
       end
       --ngx.log(ngx.NOTICE, "http log" .. payload)
