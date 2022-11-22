@@ -202,8 +202,16 @@ function HttpLogHandler:log(conf)
         set_serialize_value(key, sandbox(expression, sandbox_opts)())
       end
     end
-
-    local responseBod = kong.service.response.get_raw_body()
+    local ctx = ngx.ctx
+    local responseBod
+    --some time kong is the one throwing the error so buffered_proxy wont be set as the upstream is not called
+    if ctx.buffered_proxying then
+      responseBod = kong.service.response.get_raw_body()
+      else
+        responseBod = kong.response.get_raw_body()
+    end
+    ngx.log(ngx.NOTICE,tostring(graph_call))
+    
     local encoding = kong.response.get_header("Content-Encoding")
     if encoding == "gzip" then
       responseBod = inflate_gzip(responseBod)
