@@ -178,9 +178,10 @@ function HttpLogHandler:log(conf)
   local graph_call =  tostring(ngx.var.upstream_uri) == conf.graphql_uri
  --ngx.log(ngx.NOTICE, "HttpLogHandler:log:isgraph: " ..tostring(graph_call))
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log:httpstatus: " ..tostring(kong.response.get_status()))
-  if not (graph_call and tostring(kong.response.get_status()):find("2", 1, true) == 1) then
-    ngx.log(ngx.NOTICE, "HttpLogHandler:log:httpstatus: " ..tostring((graph_call and tostring(kong.response.get_status()):find("2", 1, true) == 1)))
-    ngx.log(ngx.NOTICE,tostring(kong.response.get_status()))
+  if not graph_call and not (tostring(kong.response.get_status()):find("2", 1, true) == 1) then
+    --ngx.log(ngx.NOTICE, "HttpLogHandler:log:httpstatus: " ..tostring((graph_call and tostring(kong.response.get_status()):find("2", 1, true) == 1)))
+    --ngx.log(ngx.NOTICE,tostring(kong.response.get_status()))
+    --ngx.log(ngx.NOTICE,tostring(graph_call))
     logit = true
   end
   if graph_call then
