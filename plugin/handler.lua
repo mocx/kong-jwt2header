@@ -184,8 +184,12 @@ function HttpLogHandler:log(conf)
   end
   if graph_call then
     --ngx.log(ngx.NOTICE, kong.service.response.get_raw_body())
-    local body_ = cjson.decode(kong.service.response.get_raw_body())
-    logit =  body_.errors  ~= nil
+    if kong.service.response.get_raw_body() then
+      local body_ = cjson.decode(kong.service.response.get_raw_body())
+      logit =  body_.errors  ~= nil 
+      --ngx.log(ngx.NOTICE, cjson.encode(body_.errors))
+    end
+    
   end
 
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log:logit: " ..tostring(logit))
