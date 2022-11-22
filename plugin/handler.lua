@@ -170,22 +170,12 @@ end
 
 
 function HttpLogHandler:log(conf)
-  --ngx.log(ngx.NOTICE, "HttpLogHandler:log")
-  --ngx.log(ngx.NOTICE, "HttpLogHandler:log: incoming body" .. ngx.req.get_body_data())
   local logit = false
-  --ngx.log(ngx.NOTICE, "HttpLogHandler:log:upstream: " ..tostring(ngx.var.upstream_uri))
-  --ngx.log(ngx.NOTICE, "HttpLogHandler:log:conf_graphurl: " ..conf.graphql_uri)
   local graph_call =  tostring(ngx.var.upstream_uri) == conf.graphql_uri
- --ngx.log(ngx.NOTICE, "HttpLogHandler:log:isgraph: " ..tostring(graph_call))
-  --ngx.log(ngx.NOTICE, "HttpLogHandler:log:httpstatus: " ..tostring(kong.response.get_status()))
   if not graph_call and not (tostring(kong.response.get_status()):find("2", 1, true) == 1) then
-    --ngx.log(ngx.NOTICE, "HttpLogHandler:log:httpstatus: " ..tostring((graph_call and tostring(kong.response.get_status()):find("2", 1, true) == 1)))
-    --ngx.log(ngx.NOTICE,tostring(kong.response.get_status()))
-    --ngx.log(ngx.NOTICE,tostring(graph_call))
     logit = true
   end
   if graph_call then
-    --ngx.log(ngx.NOTICE, kong.service.response.get_raw_body())
     if kong.service.response.get_raw_body() then
       local body_ = cjson.decode(kong.service.response.get_raw_body())
       logit =  body_.errors  ~= nil 
@@ -193,8 +183,6 @@ function HttpLogHandler:log(conf)
     end
     
   end
-
-  --ngx.log(ngx.NOTICE, "HttpLogHandler:log:logit: " ..tostring(logit))
   if logit then
     if conf.custom_fields_by_lua then
       local set_serialize_value = kong.log.set_serialize_value
@@ -205,14 +193,11 @@ function HttpLogHandler:log(conf)
     local ctx = ngx.ctx
     local responseBod
     --some time kong is the one throwing the error so buffered_proxy wont be set as the upstream is not called
-    ngx.log(ngx.NOTICE, "kong.service.response.get_raw_body(): " .. kong.service.response.get_raw_body())
     if ctx.buffered_proxying then
       responseBod = kong.service.response.get_raw_body()
       else
-        --ngx.log(ngx.NOTICE, "statsu" .. tostring(kong.response.get_status()))
         local t = { ["message"] = "Error thrown by Kong"}
         responseBod = cjson.encode(t)
-        --ngx.log(ngx.NOTICE, "httplog" .. payload)
     end
     
     
@@ -238,12 +223,9 @@ function HttpLogHandler:log(conf)
     jsonObj.client_ip = nil
     -- remove all other headers except those that start with 'x-'
     for k, v in pairs(jsonObj.request.headers) do
-      --print(k," ", v)
       if not (k:find("x", 1, true) == 1 or k:find("X", 1, true) == 1) then 
-        --print(k," ", v)
         jsonObj.request.headers[k] = nil
       end
-      --ngx.log(ngx.NOTICE, "http log" .. payload)
     end
     local entry = cjson.encode(jsonObj)
   
