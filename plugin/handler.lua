@@ -179,7 +179,8 @@ function HttpLogHandler:log(conf)
  --ngx.log(ngx.NOTICE, "HttpLogHandler:log:isgraph: " ..tostring(graph_call))
   --ngx.log(ngx.NOTICE, "HttpLogHandler:log:httpstatus: " ..tostring(kong.response.get_status()))
   if not (graph_call and tostring(kong.response.get_status()):find("2", 1, true) == 1) then
-    --ngx.log(ngx.NOTICE, "HttpLogHandler:log:httpstatus: " ..tostring((graph_call and tostring(kong.response.get_status()):find("2", 1, true) == 1)))
+    ngx.log(ngx.NOTICE, "HttpLogHandler:log:httpstatus: " ..tostring((graph_call and tostring(kong.response.get_status()):find("2", 1, true) == 1)))
+    ngx.log(ngx.NOTICE,tostring(kong.response.get_status()))
     logit = true
   end
   if graph_call then
