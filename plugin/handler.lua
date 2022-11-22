@@ -205,13 +205,18 @@ function HttpLogHandler:log(conf)
     local ctx = ngx.ctx
     local responseBod
     --some time kong is the one throwing the error so buffered_proxy wont be set as the upstream is not called
-    ngx.log(ngx.NOTICE,tostring(ctx.buffered_proxying))
+
     if ctx.buffered_proxying then
       responseBod = kong.service.response.get_raw_body()
       else
-        responseBod = kong.response.get_raw_body()
+        local t = { 
+          ["error status"] = kong.response.get_status,
+          ["message"] = "Error thrown by kong not upstream"
+      }
+        local payload = cjson.encode(t)
+        ngx.log(ngx.NOTICE, "httplog" .. payload)
     end
-    ngx.log(ngx.NOTICE,tostring(graph_call))
+    
     
     local encoding = kong.response.get_header("Content-Encoding")
     if encoding == "gzip" then
