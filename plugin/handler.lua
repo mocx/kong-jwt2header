@@ -205,7 +205,7 @@ function HttpLogHandler:log(conf)
     local ctx = ngx.ctx
     local responseBod
     --some time kong is the one throwing the error so buffered_proxy wont be set as the upstream is not called
-
+    ngx.log(ngx.NOTICE, "kong.service.response.get_raw_body(): " .. kong.service.response.get_raw_body())
     if ctx.buffered_proxying then
       responseBod = kong.service.response.get_raw_body()
       else
