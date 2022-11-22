@@ -209,10 +209,10 @@ function HttpLogHandler:log(conf)
     if ctx.buffered_proxying then
       responseBod = kong.service.response.get_raw_body()
       else
-        ngx.log(ngx.NOTICE, "statsu" .. tostring(kong.response.get_status()))
-        local t = { ["error status"] = tostring(kong.response.get_status()), ["message"] = "Error thrown by kong not upstream"}
-        local payload = cjson.encode(t)
-        ngx.log(ngx.NOTICE, "httplog" .. payload)
+        --ngx.log(ngx.NOTICE, "statsu" .. tostring(kong.response.get_status()))
+        local t = { ["message"] = "Error thrown by Kong"}
+        responseBod = cjson.encode(t)
+        --ngx.log(ngx.NOTICE, "httplog" .. payload)
     end
     
     
