@@ -81,7 +81,7 @@ local function isempty(s)
 end
 
 local function getResponseJson(s)
-  ngx.log(ngx.DEBUG, "json_decode_staus: " .. tostring(s))
+  ngx.log(ngx.DEBUG, "getResponseJson: body: " .. tostring(s))
   return cjson.decode(s)
 end
 
@@ -183,15 +183,18 @@ function HttpLogHandler:log(conf)
   if graph_call then
     if kong.service.response.get_raw_body() then
       local status, jsonVal, err = xpcall (getResponseJson, debug.traceback, kong.service.response.get_raw_body())
-      ngx.log(ngx.DEBUG, "json_decode_staus: " .. tostring(status))
+      ngx.log(ngx.DEBUG, "json_decode_status: " .. tostring(status))
+      if not status then
+        ngx.log(ngx.WARN, "graphql endpoint returned non-json response. please check upstream.")
+      end
       if err then
         ngx.log(ngx.DEBUG, "json_decode_error: " .. err)
       end
-      if jsonVal then
-        ngx.log(ngx.DEBUG, "json_decode_returned_val: " .. jsonVal)
+      if jsonVal and status then
+        ngx.log(ngx.DEBUG, "json_decode_returned_val: " .. tostring(jsonVal))
       end
       
-      if not err then
+      if status then
         local body_ = jsonVal
         logit =  body_.errors  ~= nil 
         ngx.log(ngx.DEBUG, cjson.encode(body_.errors))
