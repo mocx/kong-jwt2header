@@ -80,11 +80,15 @@ local function isempty(s)
   return s == nil or s == ''
 end
 
+local function getResponseJson(s)
+  return cjson.decode(s)
+end
+
 -- Sends the provided payload (a string) to the configured plugin host
 -- @return true if everything was sent correctly, falsy if error
 -- @return error message if there was an error
 local function log_payload(self, conf, payload)
-  ngx.log(ngx.NOTICE, "httplog" .. payload)
+  ngx.log(ngx.ERR, "httplog: " .. payload)
   local success = true
   local err_msg
   local http_endpoint = conf.http_endpoint
@@ -177,9 +181,18 @@ function HttpLogHandler:log(conf)
   end
   if graph_call then
     if kong.service.response.get_raw_body() then
-      local body_ = cjson.decode(kong.service.response.get_raw_body())
-      logit =  body_.errors  ~= nil 
-      --ngx.log(ngx.NOTICE, cjson.encode(body_.errors))
+      status, jsonVal, err = xpcall (getResponseJson, debug.traceback, kong.service.response.get_raw_body())
+      ngx.log(ngx.DEBUG, "json_decode_staus: " .. status)
+      ngx.log(ngx.DEBUG, "json_decode_error: " .. err)
+      ngx.log(ngx.DEBUG, "json_decode_returned_val: " .. jsonVal)
+      if not err then
+        local body_ = jsonVal
+        logit =  body_.errors  ~= nil 
+        ngx.log(ngx.DEBUG, cjson.encode(body_.errors))
+      elseif not (tostring(kong.response.get_status()):find("2", 1, true) == 1) then
+        logit = true
+      end
+      
     end
     
   end
