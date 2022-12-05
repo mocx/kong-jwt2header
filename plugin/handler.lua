@@ -191,13 +191,19 @@ function HttpLogHandler:log(conf)
         ngx.log(ngx.DEBUG, "json_decode_error: " .. err)
       end
       if jsonVal and status then
-        ngx.log(ngx.DEBUG, "json_decode_returned_val: " .. tostring(jsonVal))
+        ngx.log(ngx.DEBUG, "json_decode_returned_val: " .. cjson.encode(jsonVal))
       end
       
       if status then
         local body_ = jsonVal
-        logit =  body_.errors  ~= nil 
-        ngx.log(ngx.DEBUG, cjson.encode(body_.errors))
+        if body_.errors then
+          logit =  body_.errors  ~= nil 
+          ngx.log(ngx.DEBUG, cjson.encode(body_.errors))
+        elseif body_.error then
+          logit =  body_.error  ~= nil 
+          ngx.log(ngx.DEBUG, cjson.encode(body_.error))
+        end
+        
       elseif not (tostring(kong.response.get_status()):find("2", 1, true) == 1) then
         logit = true
       end
