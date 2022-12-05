@@ -81,6 +81,7 @@ local function isempty(s)
 end
 
 local function getResponseJson(s)
+  ngx.log(ngx.DEBUG, "json_decode_staus: " .. tostring(s))
   return cjson.decode(s)
 end
 
@@ -183,8 +184,13 @@ function HttpLogHandler:log(conf)
     if kong.service.response.get_raw_body() then
       local status, jsonVal, err = xpcall (getResponseJson, debug.traceback, kong.service.response.get_raw_body())
       ngx.log(ngx.DEBUG, "json_decode_staus: " .. tostring(status))
-      ngx.log(ngx.DEBUG, "json_decode_error: " .. err)
-      ngx.log(ngx.DEBUG, "json_decode_returned_val: " .. jsonVal)
+      if err then
+        ngx.log(ngx.DEBUG, "json_decode_error: " .. err)
+      end
+      if jsonVal then
+        ngx.log(ngx.DEBUG, "json_decode_returned_val: " .. jsonVal)
+      end
+      
       if not err then
         local body_ = jsonVal
         logit =  body_.errors  ~= nil 
