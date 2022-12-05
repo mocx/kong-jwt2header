@@ -183,7 +183,7 @@ function HttpLogHandler:log(conf)
   if graph_call then
     if kong.service.response.get_raw_body() then
       local status, jsonVal, err = xpcall (getResponseJson, debug.traceback, kong.service.response.get_raw_body())
-      ngx.log(ngx.DEBUG, "json_decode_status: " .. tostring(status))
+      ngx.log(ngx.DEBUG, "json_decode_test_status: " .. tostring(status))
       if not status then
         ngx.log(ngx.WARN, "graphql endpoint returned non-json response. please check upstream.")
       end
