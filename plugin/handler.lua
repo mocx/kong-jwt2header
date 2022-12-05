@@ -182,7 +182,7 @@ function HttpLogHandler:log(conf)
   if graph_call then
     if kong.service.response.get_raw_body() then
       local status, jsonVal, err = xpcall (getResponseJson, debug.traceback, kong.service.response.get_raw_body())
-      ngx.log(ngx.DEBUG, "json_decode_staus: " .. status)
+      ngx.log(ngx.DEBUG, "json_decode_staus: " .. tostring(status))
       ngx.log(ngx.DEBUG, "json_decode_error: " .. err)
       ngx.log(ngx.DEBUG, "json_decode_returned_val: " .. jsonVal)
       if not err then
